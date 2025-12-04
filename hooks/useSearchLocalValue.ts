@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export const useSearchLocalValue = (
   value: string,
@@ -8,23 +8,25 @@ export const useSearchLocalValue = (
 ) => {
   const [localValue, setLocalValue] = useState(value);
 
-  // Debounce the onChange callback (300ms)
+  // Debounce, tapi hanya trigger jika localValue !== value (prevent reset)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      onChange(localValue);
+      if (localValue !== value) {
+        onChange(localValue);
+      }
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [localValue, onChange]);
+  }, [localValue, value, onChange]);
 
-  // Sync with external value changes
+  // Sync external change (misal URL berubah)
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
 
   const handleClear = () => {
-    setLocalValue('');
-    onChange('');
+    setLocalValue("");
+    onChange("");
   };
 
   return {
@@ -32,4 +34,4 @@ export const useSearchLocalValue = (
     setLocalValue,
     handleClear,
   };
-}
+};

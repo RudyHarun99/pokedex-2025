@@ -1,40 +1,19 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-} from "react";
+import { useCallback } from "react";
 
 export function usePokemonQueryParams() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Ambil value dari URL tapi memoized
-  const rawSearch = useMemo(() =>
-    searchParams.get("search") || "",
-    [searchParams]
-  );
-  const rawPage = useMemo(() =>
-    Number(searchParams.get("page")) || 1,
-    [searchParams]
-  );
+  const searchTerm = searchParams.get("search") || "";
+  const currentPage = Number(searchParams.get("page")) || 1;
+  const searchParamsString = searchParams.toString();
 
-  // State internal
-  const [searchTerm, setSearchTerm] = useState(rawSearch);
-  const [currentPage, setCurrentPage] = useState(rawPage);
-
-  // Sync URL → State (hanya ketika URL benar-benar berubah)
-  useEffect(() => {
-    setSearchTerm(rawSearch);
-    setCurrentPage(rawPage);
-  }, [rawSearch, rawPage]);
-
-  // Handle Search
-  const handleSearchChange = useCallback((value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParamsString);
 
       if (value.trim()) params.set("search", value);
       else params.delete("search");
@@ -43,16 +22,17 @@ export function usePokemonQueryParams() {
 
       router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [router]
+    [router, searchParamsString] // ini aman
   );
 
-  // Handle Pagination
-  const handlePageChange = useCallback((page: number) => {
+  const handlePageChange = useCallback(
+    (page: number) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("page", String(page));
+
       router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [router]
+    [router, searchParamsString]
   );
 
   return {
