@@ -131,44 +131,60 @@ export function getTypeColor(typeName: string): string {
 
 /**
  * Generate page numbers to display
- * @param typeName - Pokémon type name
- * @returns TailwindCSS color classes
+ * @param totalPages Total pages
+ * @param currentPage Current page
+ * @returns Array numbers
  */
 export function getPageNumbers(
   totalPages: number,
   currentPage: number,
 ) {
   const pages: (number | string)[] = [];
-  const maxVisible = 5;
+  const maxSlots = 7; // total visible slots including first, last, ellipsis
 
-  if (totalPages <= maxVisible) {
-    // Show all pages if total is small
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
-    }
-  } else {
-    // Always show first page
-    pages.push(1);
-
-    if (currentPage > 3) {
-      pages.push('...');
-    }
-
-    // Show pages around current page
-    const start = Math.max(2, currentPage - 1);
-    const end = Math.min(totalPages - 1, currentPage + 1);
-
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-
-    if (currentPage < totalPages - 2) {
-      pages.push('...');
-    }
-
-    // Always show last page
-    pages.push(totalPages);
+  if (totalPages <= maxSlots) {
+    // Jika total page kecil, tampilkan semua
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+    return pages;
   }
+
+  const first = 1;
+  const last = totalPages;
+
+  const middleSlots = maxSlots - 2; // slot untuk halaman tengah
+  let start = Math.max(2, currentPage - Math.floor(middleSlots / 2));
+  let end = Math.min(totalPages - 1,
+    currentPage + Math.floor(middleSlots / 2)
+  );
+
+  // Adjust jika di awal
+  if (currentPage <= Math.floor(middleSlots / 2) + 1) {
+    start = 2;
+    end = middleSlots;
+  }
+
+  // Adjust jika di akhir
+  if (currentPage >= totalPages - Math.floor(middleSlots / 2)) {
+    start = totalPages - middleSlots;
+    end = totalPages - 1;
+  }
+
+  // Push first page
+  pages.push(first);
+
+  // Left ellipsis
+  if (start > 2) pages.push('...');
+
+  // Middle pages
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+
+  // Right ellipsis
+  if (end < totalPages - 1) pages.push('...');
+
+  // Push last page
+  pages.push(last);
 
   return pages;
 };
